@@ -2,7 +2,7 @@
 #
 # To get started with Nuxt see: https://nuxtjs.org/docs/get-started/installation
 #
-name: Deploy Nuxt site to Pages
+name: Deploy Nuxt site to server
 
 on:
   # Runs on pushes targeting the default branch
@@ -72,10 +72,16 @@ jobs:
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
       - name: Static HTML export with Nuxt
         run: ${{ steps.detect-package-manager.outputs.manager }} run generate
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to server via rsync
+        uses: burnett01/rsync-deployments@v8
         with:
+          switches: -avzr --delete
           path: ./dist
+          remote_path: ${{ secrets.REMOTE_PATH }}
+          remote_host: ${{ secrets.REMOTE_HOST }}
+          remote_port: ${{ secrets.REMOTE_PORT }}
+          remote_user: ${{ secrets.REMOTE_USER }}
+          remote_key: ${{ secrets.REMOTE_PRIVATE_KEY }}
 
   # Deployment job
   deploy:
